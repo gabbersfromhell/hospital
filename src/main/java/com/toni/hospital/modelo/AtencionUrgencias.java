@@ -25,6 +25,26 @@ public class AtencionUrgencias {
     @Column(name = "fecha_hora_llegada", nullable = false)
     private LocalDateTime fechaHoraLlegada;
 
+    // Medio por el que llega: ambulancia, por sus medios u otro.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "medio_llegada", nullable = false)
+    private MedioLlegadaUrgencias medioLlegada;
+
+    /*
+     * Lugar desde el que procede el paciente, si se conoce.
+     * Por ejemplo, su domicilio, la vía pública o un centro sanitario.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "procedencia")
+    private ProcedenciaUrgencias procedencia;
+
+    /*
+     * Código que se muestra en las pantallas para llamar al paciente.
+     * Es distinto del ID de esta atención y del CIP del paciente.
+     */
+    @Column(name = "codigo_llamamiento", length = 30)
+    private String codigoLlamamiento;
+
     /*
      * Momento en que comienza la primera valoración médica.
      * Puede quedar null mientras el paciente no haya sido valorado.
@@ -69,8 +89,8 @@ public class AtencionUrgencias {
     private Hospital hospitalAtencion;
 
     /*
-     * Ubicación actual del paciente, por ejemplo BOX-07.
-     * Puede ser null si todavía no se le ha asignado una ubicación.
+     * Ubicación actual del paciente dentro de Urgencias,
+     * por ejemplo BOX-07. Puede ser null si aún no se le ha asignado.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ubicacion_actual_id")
@@ -98,7 +118,7 @@ public class AtencionUrgencias {
 
     /*
      * Vínculo profesional del paciente con el hospital
-     * u otro organismo. No determina por sí solo el triaje.
+     * u otro organismo. No determina por sí solo el nivel de triaje.
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "vinculo_profesional", nullable = false)
@@ -168,6 +188,30 @@ public class AtencionUrgencias {
 
     public void setFechaHoraLlegada(LocalDateTime fechaHoraLlegada) {
         this.fechaHoraLlegada = fechaHoraLlegada;
+    }
+
+    public MedioLlegadaUrgencias getMedioLlegada() {
+        return medioLlegada;
+    }
+
+    public void setMedioLlegada(MedioLlegadaUrgencias medioLlegada) {
+        this.medioLlegada = medioLlegada;
+    }
+
+    public ProcedenciaUrgencias getProcedencia() {
+        return procedencia;
+    }
+
+    public void setProcedencia(ProcedenciaUrgencias procedencia) {
+        this.procedencia = procedencia;
+    }
+
+    public String getCodigoLlamamiento() {
+        return codigoLlamamiento;
+    }
+
+    public void setCodigoLlamamiento(String codigoLlamamiento) {
+        this.codigoLlamamiento = codigoLlamamiento;
     }
 
     public LocalDateTime getFechaHoraPrimeraAsistenciaMedica() {
@@ -299,9 +343,7 @@ public class AtencionUrgencias {
         return trasladosHospitalarios;
     }
 
-    /**
-     * Añade una valoración y establece la relación por ambos lados.
-     */
+    /** Añade una valoración y establece la relación por ambos lados. */
     public void agregarValoracionTriaje(ValoracionTriaje valoracion) {
         if (valoracion != null && !valoracionesTriaje.contains(valoracion)) {
             valoracionesTriaje.add(valoracion);
@@ -309,9 +351,7 @@ public class AtencionUrgencias {
         }
     }
 
-    /**
-     * Añade una interconsulta y establece la relación por ambos lados.
-     */
+    /** Añade una interconsulta y establece la relación por ambos lados. */
     public void agregarInterconsulta(Interconsulta interconsulta) {
         if (interconsulta != null
                 && !interconsultas.contains(interconsulta)) {
@@ -320,9 +360,7 @@ public class AtencionUrgencias {
         }
     }
 
-    /**
-     * Añade una solicitud de ingreso y establece la relación por ambos lados.
-     */
+    /** Añade una solicitud de ingreso y establece la relación por ambos lados. */
     public void agregarSolicitudIngreso(
             SolicitudIngreso solicitudIngreso
     ) {
@@ -333,9 +371,7 @@ public class AtencionUrgencias {
         }
     }
 
-    /**
-     * Añade un traslado y establece la relación por ambos lados.
-     */
+    /** Añade un traslado y establece la relación por ambos lados. */
     public void agregarTrasladoHospitalario(
             TrasladoHospitalario traslado
     ) {

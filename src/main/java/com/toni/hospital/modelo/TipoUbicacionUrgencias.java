@@ -9,7 +9,6 @@ public enum TipoUbicacionUrgencias {
     ZONA_TRAUMA,
     DESPACHO_PSIQUIATRIA,
     OBSERVACION,
-    UCSI,
     UCI,
     OTRA
 }

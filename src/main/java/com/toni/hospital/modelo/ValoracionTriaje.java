@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
  * de Urgencias.
  *
  * Una atención puede tener varias valoraciones: la inicial y las
- * reevaluaciones posteriores. Así se conserva el historial de niveles.
+ * reevaluaciones posteriores. Así se conserva el historial de niveles
+ * y del profesional de Enfermería que realizó cada valoración.
  */
 @Entity
 @Table(name = "valoraciones_triaje")
@@ -37,7 +38,12 @@ public class ValoracionTriaje {
     @JoinColumn(name = "atencion_urgencias_id", nullable = false)
     private AtencionUrgencias atencionUrgencias;
 
-    // Constructor vacío requerido por JPA.
+    // Enfermero o enfermera que realizó esta valoración.
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "enfermero_id", nullable = false)
+    private Enfermero enfermero;
+
+    /** Constructor vacío necesario para que JPA cree la entidad. */
     public ValoracionTriaje() {
     }
 
@@ -75,5 +81,13 @@ public class ValoracionTriaje {
 
     public void setAtencionUrgencias(AtencionUrgencias atencionUrgencias) {
         this.atencionUrgencias = atencionUrgencias;
+    }
+
+    public Enfermero getEnfermero() {
+        return enfermero;
+    }
+
+    public void setEnfermero(Enfermero enfermero) {
+        this.enfermero = enfermero;
     }
 }

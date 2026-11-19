@@ -10,13 +10,13 @@ import java.util.Optional;
 public interface ValoracionTriajeRepository
         extends JpaRepository<ValoracionTriaje, Long> {
 
-    /** Busca una valoración y carga su atención asociada. */
+    /** Carga la atención y el enfermero asociados a la valoración. */
     @Override
-    @EntityGraph(attributePaths = "atencionUrgencias")
+    @EntityGraph(attributePaths = {"atencionUrgencias", "enfermero"})
     Optional<ValoracionTriaje> findById(Long id);
 
     /** Lista las valoraciones de una atención, de más reciente a más antigua. */
-    @EntityGraph(attributePaths = "atencionUrgencias")
+    @EntityGraph(attributePaths = {"atencionUrgencias", "enfermero"})
     List<ValoracionTriaje> findByAtencionUrgencias_IdOrderByFechaHoraDesc(
             Long atencionId
     );

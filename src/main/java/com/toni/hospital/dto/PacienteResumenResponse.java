@@ -1,5 +1,9 @@
 package com.toni.hospital.dto;
 
-/** Identificación mínima del paciente para respuestas relacionadas. */
-public record PacienteResumenResponse(Long id, String nombre, String apellidos) {
+/** Datos básicos del paciente que se muestran en una cita. */
+public record PacienteResumenResponse(
+        Long id,
+        String nombre,
+        String apellidos
+) {
 }

@@ -1,5 +1,6 @@
 package com.toni.hospital.controlador;
 
+import com.toni.hospital.dto.AtencionUrgenciasCensoResponse;
 import com.toni.hospital.dto.AtencionUrgenciasRequest;
 import com.toni.hospital.dto.AtencionUrgenciasResponse;
 import com.toni.hospital.dto.CerrarAtencionUrgenciasRequest;
@@ -47,13 +48,16 @@ public class AtencionUrgenciasController {
 
     /**
      * GET /atenciones-urgencias/activas
-     * Devuelve el censo de pacientes que siguen en Urgencias.
+     * Devuelve el censo administrativo de Urgencias.
+     *
+     * Si el paciente tiene una restricción de confidencialidad activa,
+     * no se devuelven sus datos ni su ubicación.
      */
     @GetMapping("/activas")
-    public List<AtencionUrgenciasResponse> listarAtencionesActivas() {
+    public List<AtencionUrgenciasCensoResponse> listarAtencionesActivas() {
         return atencionUrgenciasService.listarAtencionesActivas()
                 .stream()
-                .map(this::convertirAResponse)
+                .map(this::convertirACensoResponse)
                 .toList();
     }
 
@@ -95,7 +99,7 @@ public class AtencionUrgenciasController {
 
     /**
      * POST /atenciones-urgencias/{id}/cerrar
-     * Cierra la atención y registra el resultado.
+     * Cierra la atención y registra su resultado.
      */
     @PostMapping("/{id}/cerrar")
     public AtencionUrgenciasResponse cerrarAtencion(
@@ -109,7 +113,34 @@ public class AtencionUrgenciasController {
     }
 
     /**
-     * Convierte la entidad JPA en el DTO de respuesta.
+     * Convierte una atención en el formato reducido del censo.
+     */
+    private AtencionUrgenciasCensoResponse convertirACensoResponse(
+            AtencionUrgencias atencion
+    ) {
+        boolean pacienteOculto =
+                atencionUrgenciasService.tieneRestriccionConfidencialidad(
+                        atencion.getPaciente().getId(),
+                        atencion.getHospitalAtencion().getId()
+                );
+
+        return new AtencionUrgenciasCensoResponse(
+                atencion.getId(),
+                atencion.getFechaHoraLlegada(),
+                pacienteOculto,
+                pacienteOculto
+                        ? null
+                        : convertirPacienteAResumen(atencion.getPaciente()),
+                pacienteOculto
+                        ? null
+                        : convertirUbicacionAReferencia(
+                        atencion.getUbicacionActual()
+                )
+        );
+    }
+
+    /**
+     * Convierte la entidad JPA en la respuesta detallada de una atención.
      */
     private AtencionUrgenciasResponse convertirAResponse(
             AtencionUrgencias atencion
@@ -117,6 +148,9 @@ public class AtencionUrgenciasController {
         return new AtencionUrgenciasResponse(
                 atencion.getId(),
                 atencion.getFechaHoraLlegada(),
+                atencion.getMedioLlegada(),
+                atencion.getProcedencia(),
+                atencion.getCodigoLlamamiento(),
                 atencion.getFechaHoraPrimeraAsistenciaMedica(),
                 atencion.getFechaHoraFinUrgencias(),
                 atencion.getMotivoConsulta(),

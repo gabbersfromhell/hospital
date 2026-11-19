@@ -2,8 +2,10 @@ package com.toni.hospital.servicio;
 
 import com.toni.hospital.dto.ValoracionTriajeRequest;
 import com.toni.hospital.modelo.AtencionUrgencias;
+import com.toni.hospital.modelo.Enfermero;
 import com.toni.hospital.modelo.ValoracionTriaje;
 import com.toni.hospital.repositorio.AtencionUrgenciasRepository;
+import com.toni.hospital.repositorio.EnfermeroRepository;
 import com.toni.hospital.repositorio.ValoracionTriajeRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,18 +15,24 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Gestiona las valoraciones de triaje.
+ */
 @Service
 public class ValoracionTriajeService {
 
     private final ValoracionTriajeRepository valoracionTriajeRepository;
     private final AtencionUrgenciasRepository atencionUrgenciasRepository;
+    private final EnfermeroRepository enfermeroRepository;
 
     public ValoracionTriajeService(
             ValoracionTriajeRepository valoracionTriajeRepository,
-            AtencionUrgenciasRepository atencionUrgenciasRepository
+            AtencionUrgenciasRepository atencionUrgenciasRepository,
+            EnfermeroRepository enfermeroRepository
     ) {
         this.valoracionTriajeRepository = valoracionTriajeRepository;
         this.atencionUrgenciasRepository = atencionUrgenciasRepository;
+        this.enfermeroRepository = enfermeroRepository;
     }
 
     /** Lista las valoraciones de una atención, de más reciente a más antigua. */
@@ -66,7 +74,7 @@ public class ValoracionTriajeService {
     }
 
     /**
-     * Registra una nueva valoración.
+     * Registra una valoración y la vincula con la atención y el enfermero.
      * La fecha y hora las establece el servidor.
      */
     @Transactional
@@ -77,12 +85,20 @@ public class ValoracionTriajeService {
         AtencionUrgencias atencion =
                 comprobarAtencionExiste(atencionId);
 
+        Enfermero enfermero =
+                enfermeroRepository.findById(request.enfermeroId())
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Enfermero no encontrado"
+                        ));
+
         ValoracionTriaje valoracion = new ValoracionTriaje();
         valoracion.setFechaHora(LocalDateTime.now());
         valoracion.setNivelTriaje(request.nivelTriaje());
         valoracion.setObservaciones(request.observaciones());
+        valoracion.setEnfermero(enfermero);
 
-        // Actualiza la relación desde la atención y desde la valoración.
+        // Establece la relación entre la valoración y la atención.
         atencion.agregarValoracionTriaje(valoracion);
 
         return valoracionTriajeRepository.save(valoracion);

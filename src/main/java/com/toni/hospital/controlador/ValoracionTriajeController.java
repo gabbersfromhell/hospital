@@ -1,7 +1,9 @@
 package com.toni.hospital.controlador;
 
+import com.toni.hospital.dto.ReferenciaResponse;
 import com.toni.hospital.dto.ValoracionTriajeRequest;
 import com.toni.hospital.dto.ValoracionTriajeResponse;
+import com.toni.hospital.modelo.Enfermero;
 import com.toni.hospital.modelo.ValoracionTriaje;
 import com.toni.hospital.servicio.ValoracionTriajeService;
 import jakarta.validation.Valid;
@@ -12,6 +14,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
+/**
+ * Endpoints para consultar y registrar valoraciones de triaje.
+ */
 @RestController
 @RequestMapping(
         "/atenciones-urgencias/{atencionId}/valoraciones-triaje"
@@ -84,7 +89,18 @@ public class ValoracionTriajeController {
                 valoracion.getFechaHora(),
                 valoracion.getNivelTriaje(),
                 valoracion.getObservaciones(),
-                valoracion.getAtencionUrgencias().getId()
+                valoracion.getAtencionUrgencias().getId(),
+                convertirEnfermeroAReferencia(valoracion.getEnfermero())
+        );
+    }
+
+    /** Devuelve una referencia sencilla del profesional de Enfermería. */
+    private ReferenciaResponse convertirEnfermeroAReferencia(
+            Enfermero enfermero
+    ) {
+        return new ReferenciaResponse(
+                enfermero.getId(),
+                enfermero.getNombre() + " " + enfermero.getApellidos()
         );
     }
 }
